@@ -1,0 +1,11 @@
+*
+
+!services.sh
+!php.d
+!php.d/*
+!nginx.d
+!nginx.d/*
+!system.d
+!system.d/*
+!.gitignore
+!supervisord.conf
