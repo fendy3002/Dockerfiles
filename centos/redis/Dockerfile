@@ -1,5 +1,6 @@
 FROM os/centos:latest
-MAINTAINER "Fendy Heryanto" <fendy3002@yahoo.com>
+MAINTAINER "Fendy Heryanto" <fendy3002@gmail.com>
+ENV container docker
 
 WORKDIR "/tmp"
 #redis
@@ -9,7 +10,7 @@ RUN wget http://download.redis.io/releases/redis-3.0.7.tar.gz;\
     make;\
     mv /tmp/redis-3.0.7 /etc/redis;
 
-ADD ./redis.sevice /etc/systemd/system/redis.service
+ADD ./redis.service /etc/systemd/system/redis.service
 
 EXPOSE 6379
 WORKDIR "~"

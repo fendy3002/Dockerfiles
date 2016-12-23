@@ -1,0 +1,9 @@
+[Unit]
+Description=Redis
+
+[Service]
+User=root
+ExecStart=/etc/redis/src/redis-server
+
+[Install]
+WantedBy=multi-user.target

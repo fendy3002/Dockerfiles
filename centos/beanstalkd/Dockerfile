@@ -1,5 +1,5 @@
 FROM os/centos:latest
-MAINTAINER "Fendy Heryanto" <fendy3002@yahoo.com>
+MAINTAINER "Fendy Heryanto" <fendy3002@gmail.com>
 
 WORKDIR "/tmp"
 #download beanstalkd

@@ -13,7 +13,7 @@ RUN yum install -y supervisor
 RUN mkdir /etc/supervisor.d\
     mkdir -p /home/storage/log\
     unlink /tmp/supervisor.sock
-ADD ./compiled/supervisord.conf /etc/supervisord.conf
+ADD ./src/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 80 22
 

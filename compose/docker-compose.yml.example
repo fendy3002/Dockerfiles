@@ -4,6 +4,18 @@ services:
         build: ../centos
         image: os/centos:latest
         container_name: os
+    storage:
+        build: ../centos/storage
+        image: os/storage:latest
+        container_name: storage
+        volumes:
+            - db:/docker/db
+            - projects:/docker/projects
+            - storage:/docker/storage
+            - nginx-conf:/docker/nginx-conf
+            - supervisor:/docker/supervisor
+            - ~/docker:/host
+        tty: true
     db:
         build: ../centos/mariadb
         image: qz/db:latest
@@ -15,17 +27,19 @@ services:
     redis:
         build: ../centos/redis
         image: qz/redis:latest
-        ports: "6379:6379"
+        ports:
+            - "6379:6379"
         volumes:
             - storage:/storage
         container_name: redis
     app:
-        build: ../centos/php-nginx/app
+        build: ../centos/php7-nginx
         image: qz/app:latest
         ports:
             - "80:80"
             - "22:22"
         volumes:
+            - projects:/var/www/html
             - storage:/storage
             - nginx-conf:/etc/nginx/conf.d
             - supervisor:/etc/supervisor.d

@@ -5,17 +5,23 @@ MAINTAINER "Fendy Heryanto" <fendy3002@gmail.com>
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;\
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm;\
 yum clean all && yum -y update;\
-yum install -y php56w;\
-yum install -y php56w-common;\
-yum install -y php56w-fpm php56w-common php56w-devel\
-    php56w-mbstring php56w-mysql php56w-pear\
-    php56w-pdo php56w-xml php56w-xmlrpc;\
-yum install -y php56w-mcrypt;
+yum install -y php71w-fpm php71w-opcache;\
+yum install -y php71w-common;\
+yum install -y php71w-devel\
+    php71w-mbstring php71w-mysql php71w-pear\
+    php71w-pdo php71w-xml php71w-xmlrpc;\
+yum install -y php71w-mcrypt;
 
-#nginx composer
+#composer
+WORKDIR "/tmp"
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";\
+    php composer-setup.php;\
+    php -r "unlink('composer-setup.php');"\
+    mv composer.phar /usr/local/bin/composer;
+
+#nginx libsodium
 RUN yum clean all && yum -y update;\
-    yum install -y composer nginx libsodium-devel supervisor;\
-    pecl install libsodium;
+    yum install -y nginx libsodium-devel supervisor;
 
 #mariadb client
 ADD ./src/mariadb.repo /etc/yum.repos.d/mariadb.repo
@@ -24,9 +30,10 @@ RUN yum -y install MariaDB-client
 #downloads
 WORKDIR "/tmp"
 #pthreads
-RUN pecl download pthreads-2.0.10;\
-    tar zxvf pthreads-2.0.10.tgz;\
-    cd /tmp/pthreads-2.0.10;\
+RUN pecl channel-update pecl.php.net;\
+    pecl download pthreads-3.1.6;\
+    tar zxvf pthreads-3.1.6.tgz;\
+    cd /tmp/pthreads-3.1.6;\
     zts-phpize;\
     ./configure --with-php-config=/usr/bin/zts-php-config;\
     make;\
@@ -34,14 +41,14 @@ RUN pecl download pthreads-2.0.10;\
     echo extension=pthreads.so > /etc/php-zts.d/pthreads.ini;
 
 #libsodium
-RUN pecl download libsodium-1.0.5;\
-    tar zxvf libsodium-1.0.5.tgz;\
-    cd /tmp/libsodium-1.0.5;\
+RUN pecl channel-update pecl.php.net;\
+    pecl download libsodium-1.0.6;\
+    tar zxvf libsodium-1.0.6.tgz;\
+    cd /tmp/libsodium-1.0.6;\
     zts-phpize;\
     ./configure --with-php-config=/usr/bin/zts-php-config;\
     make;\
     cp modules/libsodium.so /usr/lib64/php-zts/modules/.;
-
 
 #php config
 ADD ./src/php.d/php.ini /etc/php.ini
@@ -61,8 +68,8 @@ WORKDIR "~"
 
 EXPOSE 80 22
 
-VOLUME ["/storage",
-    "/var/www/html",
-    "/etc/nginx/conf.d",
+VOLUME ["/storage",\
+    "/var/www/html",\
+    "/etc/nginx/conf.d",\
     "/etc/supervisor.d"]
 CMD ["/usr/bin/supervisord", "-n"]
