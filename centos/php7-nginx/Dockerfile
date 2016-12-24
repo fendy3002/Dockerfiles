@@ -16,12 +16,12 @@ yum install -y php71w-mcrypt;
 WORKDIR "/tmp"
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";\
     php composer-setup.php;\
-    php -r "unlink('composer-setup.php');"\
-    mv composer.phar /usr/local/bin/composer;
+    php -r "unlink('composer-setup.php');";\
+    mv composer.phar /usr/bin/composer;
 
 #nginx libsodium
 RUN yum clean all && yum -y update;\
-    yum install -y nginx libsodium-devel supervisor;
+    yum install -y nginx libsodium-devel;
 
 #mariadb client
 ADD ./src/mariadb.repo /etc/yum.repos.d/mariadb.repo
@@ -59,9 +59,9 @@ ADD ./src/nginx.d/nginx.conf /etc/nginx/nginx.conf
 
 #supervisor
 RUN yum install -y supervisor
-RUN mkdir /etc/supervisor.d\
-    mkdir -p /home/storage/log\
-    unlink /tmp/supervisor.sock
+RUN mkdir /etc/supervisor.d;\
+    mkdir -p /storage/log;
+
 ADD ./src/supervisord.conf /etc/supervisord.conf
 
 WORKDIR "~"
