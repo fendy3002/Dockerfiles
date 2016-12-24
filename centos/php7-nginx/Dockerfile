@@ -45,6 +45,10 @@ RUN pecl channel-update pecl.php.net;\
     pecl download libsodium-1.0.6;\
     tar zxvf libsodium-1.0.6.tgz;\
     cd /tmp/libsodium-1.0.6;\
+    phpize;\
+    ./configure --with-php-config=/usr/bin/php-config;\
+    make;\
+    cp modules/libsodium.so /usr/lib64/php/modules/.;\
     zts-phpize;\
     ./configure --with-php-config=/usr/bin/zts-php-config;\
     make;\
