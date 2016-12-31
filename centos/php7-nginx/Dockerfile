@@ -1,5 +1,6 @@
 FROM os/centos:latest
 MAINTAINER "Fendy Heryanto" <fendy3002@gmail.com>
+ENV DOLLAR $
 
 #php
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;\
