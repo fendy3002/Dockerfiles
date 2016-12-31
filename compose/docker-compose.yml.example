@@ -16,6 +16,13 @@ services:
             - supervisor:/docker/supervisor
             - ~/docker:/host
         tty: true
+    nginx-proxy:
+        image: jwilder/nginx-proxy
+        container_name: nginx-proxy
+        ports:
+            - "80:80"
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
     db:
         build: ../centos/mariadb
         image: qz/db:latest
@@ -32,42 +39,42 @@ services:
         volumes:
             - storage:/storage
         container_name: redis
-    app:
+    _app:
         build: ../centos/php7-nginx
-        image: qz/app:latest
-        ports:
-            - "80:80"
-            - "22:22"
+        image: qz/php7-nginx:latest
         volumes:
-            - projects:/var/www/html
+            - ~/projects/_app:/var/www/html
+            - ~/.ssh:/root/.ssh
             - storage:/storage
-            - nginx-conf:/etc/nginx/conf.d
-            - supervisor:/etc/supervisor.d
-        extra_hosts:
-            - "sss.sss:127.0.0.1"
         links:
             - redis:redis
             - db:db
         depends_on:
             - redis
             - db
-        container_name: app
-    node:
-        build: ../centos/node
-        image: qz/js:latest
-        ports:
-            - "3000:80"
+        environment:
+            - VIRTUAL_HOST=example.com
+            - APP_NAME=_app
+        container_name: _app
+    _queue:
+        build: ../centos/laravel-queue
+        image: qz/laravel-queue:latest
         volumes:
-            - ~/projects/Js:/app
-        container_name: js
+            - ~/projects/_queue:/var/www/html
+            - storage:/storage
+        links:
+            - redis:redis
+            - db:db
+        depends_on:
+            - redis
+            - db
+        environment:
+            - APP_NAME=_queue
+        container_name: _queue
 volumes:
     db:
         external: true
     projects:
         external: true
-    nginx-conf:
-        external: true
     storage:
-        external: true
-    supervisor:
         external: true

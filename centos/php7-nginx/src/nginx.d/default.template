@@ -1,0 +1,22 @@
+server {
+    listen       80;
+    listen       [::]:80;
+    server_name  localhost;
+    root         /var/www/html/public;
+
+    access_log /storage/log/nginx/${APP_NAME}.access_log main;
+    error_log /storage/log/nginx/${APP_NAME}.error_log info;
+
+    index  index.php index.html index.htm;
+    location / {
+        try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.php${DOLLAR}is_args${DOLLAR}args;
+    }
+    location ~ \.php${DOLLAR} {
+        try_files ${DOLLAR}uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)${DOLLAR};
+        fastcgi_pass   unix:/var/run/php5-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME   ${DOLLAR}document_root${DOLLAR}fastcgi_script_name;
+        include        fastcgi_params;
+    }
+}

@@ -23,23 +23,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";\
 RUN yum clean all && yum -y update;\
     yum install -y nginx libsodium-devel;
 
-#mariadb client
-ADD ./src/mariadb.repo /etc/yum.repos.d/mariadb.repo
-RUN yum -y install MariaDB-client
-
 #downloads
 WORKDIR "/tmp"
-#pthreads
-RUN pecl channel-update pecl.php.net;\
-    pecl download pthreads-3.1.6;\
-    tar zxvf pthreads-3.1.6.tgz;\
-    cd /tmp/pthreads-3.1.6;\
-    zts-phpize;\
-    ./configure --with-php-config=/usr/bin/zts-php-config;\
-    make;\
-    cp modules/pthreads.so /usr/lib64/php-zts/modules/.;\
-    echo extension=pthreads.so > /etc/php-zts.d/pthreads.ini;
-
 #libsodium
 RUN pecl channel-update pecl.php.net;\
     pecl download libsodium-1.0.6;\
@@ -48,32 +33,33 @@ RUN pecl channel-update pecl.php.net;\
     phpize;\
     ./configure --with-php-config=/usr/bin/php-config;\
     make;\
-    cp modules/libsodium.so /usr/lib64/php/modules/.;\
-    zts-phpize;\
-    ./configure --with-php-config=/usr/bin/zts-php-config;\
-    make;\
-    cp modules/libsodium.so /usr/lib64/php-zts/modules/.;
+    cp modules/libsodium.so /usr/lib64/php/modules/.;
 
 #php config
 ADD ./src/php.d/php.ini /etc/php.ini
 ADD ./src/php.d/www.conf /etc/php-fpm.d/www.conf
 
 #nginx config
+RUN mkdir -p /storage/log/nginx
 ADD ./src/nginx.d/nginx.conf /etc/nginx/nginx.conf
+ADD ./src/nginx.d/default.template /etc/nginx/conf.d/default.template
+ADD ./src/nginx.d/parse-nginx.sh /etc/nginx/conf.d/parse-nginx.sh
 
 #supervisor
 RUN yum install -y supervisor
 RUN mkdir /etc/supervisor.d;\
-    mkdir -p /storage/log;
+    mkdir -p /storage/log/supervisor;
 
 ADD ./src/supervisord.conf /etc/supervisord.conf
+ADD ./src/supervisor.d/php_fpm.conf /etc/supervisor.d/php_fpm.conf
+ADD ./src/supervisor.d/parse_nginx.conf /etc/supervisor.d/parse_nginx.conf
+ADD ./src/supervisor.d/nginx.conf /etc/supervisor.d/nginx.conf
 
 WORKDIR "~"
 
 EXPOSE 80 22
 
-VOLUME ["/storage",\
-    "/var/www/html",\
-    "/etc/nginx/conf.d",\
-    "/etc/supervisor.d"]
+VOLUME ["/root/.ssh",\
+    "/storage",\
+    "/var/www/html"]
 CMD ["/usr/bin/supervisord", "-n"]
