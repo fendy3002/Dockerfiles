@@ -1,1 +1,1 @@
-docker build --rm -t qz/app:latest .
+docker build -t qz/php7-nginx:latest .
